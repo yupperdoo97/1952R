@@ -264,7 +264,7 @@ musicMode = () => {
 $("#game_start").click((event) => {
     event.preventDefault();
 
-    // Start music immediately on #game_start click
+    // Start music on #game_start click
     musicMode();
 
     setInterval(changeFontColour, 200);
@@ -316,8 +316,8 @@ campaignTrail_temp.difficulty_level_json = JSON.parse("[{\"model\": \"campaign_t
  
 campaignTrail_temp.credits = 'u/yupperdoo97. Baseline code (1944) made by u/FromAshComesFire, u/ChooseanUniqueName, and u/campaigntrailaccount. Playtesting by u/itsastronomics, edmundblackadder, u/whatnamedidiuseagain. Music Code by u/whatnamedidiuseagain and seaworthinessrare. Original code for banner and theme created by GelidLagopus. Special thanks to u/itsastronomics and bigtobylarone for coding help';
 
-HistHexcolour=["#4D4C99","#C9566A","#CC7A98"];
-        HistName=["Dwight Eisenhower","Adlai Stevenson","Other Candidates"];
+HistHexcolour=["#DF9496","#A2ADBC","#c7d1c0"];
+        HistName=[" Dwight Eisenhower"," Adlai Stevenson"," Other Candidates"];
         HistEV=[442,89,0];
         HistPV=["34,075,529","27,375,090","301,323"];
         HistPVP=["55.2%","44.3%","0.5%"];
