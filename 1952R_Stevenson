@@ -51,7 +51,7 @@ campaignTrail_temp.multiple_endings=true
 //quickstats = relevant data on candidate performance (format: your candidate's electoral vote count, your candidate's popular vote share, your candidate's raw vote total)
 ans = campaignTrail_temp.player_answers[campaignTrail_temp.player_answers.length - 1]
 if (quickstats[0] == 266) {
-return "<h3>'IKE, STEVENSON, TIED FOR EC, ELECTION WILL GO TO HOUSE; McFarland, Mahoney hold off insurgent challengers, Kennedy beats Lodge; Dems hold edge in House'</h3><p>Well this is unexpected. Neither yourself nor General Eisnhower have won a majority in the electoral college.<p><p>It’s unclear what will happen now. Democrats hold a narrow majority of congressional delegations, but even a handful of defections for Ike could toss him the election. And as of now, Ike is enormously popular with many Democratic representatives</p>If you manage to win, you’ll have no shortage of challenges. You’ll need to handle the situation in Korea, thread the needle on McCarthy’s attacks, and continue the legacy of Franklin Roosevelt, all while keeping your party united. Good luck, Governor. You’re gonna need it.</p>"
+return "<h3>'IKE, STEVENSON, TIED FOR EC, ELECTION WILL GO TO HOUSE; McFarland, Mahoney hold off insurgent challengers, Kennedy beats Lodge; Dems hold edge in House'</h3><p>Well this is unexpected. Neither yourself nor General Eisenhower have won a majority in the electoral college.<p><p>It’s unclear what will happen now. Democrats hold a narrow majority of congressional delegations, but even a handful of defections for Ike could toss him the election. And as of now, Ike is enormously popular with many Democratic representatives</p>If you manage to win, you’ll have no shortage of challenges. You’ll need to handle the situation in Korea, thread the needle on McCarthy’s attacks, and continue the legacy of Franklin Roosevelt, all while keeping your party united. Good luck, Governor. You’re gonna need it.</p>"
     if (used != true) {
         setInterval(function () {
             used = true;
@@ -73,123 +73,271 @@ return "<h3>'EISENHOWER LANDSLIDE LEAVES DEMS REELING, IVES CHALKS UP FIRST VICT
 return  "<h3>Error</h3><p>Contact Yupperdoo if you get this message.</p>"
 }
 }
-// --------------------------------------------
-// NAME NORMALIZATION
-// --------------------------------------------
-function normalizeName(name) {
-  if (!name) return "";
-  return name
-    .toLowerCase()
-    .replaceAll(".", "")
-    .replaceAll("-", "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-// --------------------------------------------
-// BUILD *LIVE* VP TABLE — depends on selection
-// --------------------------------------------
-function buildVpTableLive() {
-  const chosenVP = normalizeName(campaignTrail_temp.running_mate_last_name);
-
-  // ---------------------------
-  // STEVENSON dynamic VP
-  // ---------------------------
-  let stevensonVP = "John Sparkman"; // default
-  if (chosenVP === "kefauver") stevensonVP = "Estes Kefauver";
-  else if (chosenVP === "monroney") stevensonVP = "Mike Monroney";
-  else if (chosenVP === "russell") stevensonVP = "Richard Russell";
-  else if (chosenVP === "barkley") stevensonVP = "Alben Barkley";
-  else if (chosenVP === "humphrey") stevensonVP = "Hubert Humphrey";
-
-  // ---------------------------
-  // EISENHOWER (fixed)
-  // ---------------------------
-  let eisenhowerVP = "Richard Nixon";
-
-  // ---------------------------
-  // BYRD special rule
-  // ---------------------------
-  let byrdVP = "Various";
-  if (chosenVP === "humphrey") {
-    byrdVP = "Herman Talmadge";
-  }
-
-  return {
-    "adlai stevenson": stevensonVP,
-    "dwight eisenhower": eisenhowerVP,
-    "harry byrd": byrdVP,
-
-    "other candidates": "Various",                  // LIVE table: other candidates - various
-    "unpledged electors": "N/A",          // LIVE table: unpledged - N/A
-
-    "undecided": "N/A"
-  };
-}
-
-// --------------------------------------------
-// BUILD HISTORICAL VP TABLE
-// --------------------------------------------
-function buildVpTableHistorical() {
-  return {
-    "adlai stevenson": "John Sparkman",
-    "dwight eisenhower": "Richard Nixon",
-    "harry byrd": "Various",
-
-    "other candidates": "Various",   // HISTORICAL table: other candidates - various
-    "unpledged electors": "N/A",     // HISTORICAL table: unpledged - N/A
-    "undecided": "N/A"
-  };
-}
-
-// --------------------------------------------
-// VP LOOKUP
-// --------------------------------------------
-function getVP(name, table) {
-  const clean = normalizeName(name);
-  if (table.hasOwnProperty(clean)) {
-    return table[clean];
-  }
-  return "N/A";
-}
-
-// --------------------------------------------
-// Inject VP column into results tables
-// --------------------------------------------
+// -------------------------
+// BUILD LIVE VP TABLE
+// -------------------------
 function onGameWindowChangeCandidates() {
-  const holder = document.getElementById("overall_details_container");
-  if (!holder || holder.classList.contains("done")) return;
-  holder.classList.add("done");
 
-  const vpLive = buildVpTableLive();
-  const vpHist = buildVpTableHistorical();
+  const resultsTableHolder = document.getElementById("overall_details_container");
 
-  // ========== LIVE RESULTS ==========
-  const liveTable = holder.childNodes[3].childNodes[3].children[0];
-  for (let i = 0; i < liveTable.children.length; i++) {
-    const row = liveTable.children[i];
-    const name = row.firstChild.innerText;
-    row.insertCell(1);
-    row.children[1].innerHTML = i === 0 ? "<b>Running Mate</b>" : getVP(name, vpLive);
+  if (!resultsTableHolder || resultsTableHolder.classList.contains("done")) {
+    return;
   }
 
-  // ======== HISTORICAL RESULTS ========
-  const histTable = holder.childNodes[5].childNodes[3].children[0];
-  for (let i = 0; i < histTable.children.length; i++) {
-    const row = histTable.children[i];
-    const name = row.childNodes[1].innerText;
-    row.insertCell(1);
-    row.children[1].innerHTML = i === 0 ? "<b>Running Mate</b>" : getVP(name, vpHist);
+  resultsTableHolder.classList.add("done");
+
+  let vpTable = {};
+
+  let chosenP = campaignTrail_temp.candidate_last_name;
+  let chosenVP = campaignTrail_temp.running_mate_last_name;
+
+
+  const eisenhowerVPs = {
+    "Nixon": "Richard Nixon",
+    "Lodge": "Henry Cabot Lodge",
+    "Driscoll": "Alfred Driscoll",
+    "Dirksen": "Everett Dirksen",
+    "Taft": "Robert Taft",
+    "Knowland": "William Knowland",
+    "Judd": "Walter Judd",
+    "Halleck": "Charles Halleck"
+  };
+
+
+  const stevensonVPs = {
+    "Sparkman": "John Sparkman",
+    "Kefauver": "Estes Kefauver",
+    "Monroney": "Mike Monroney",
+    "Barkley": "Alben Barkley",
+    "Russell": "Richard Russell",
+    "Humphrey": "Hubert Humphrey"
+  };
+
+
+  // -------------------------
+  // BUILD LIVE VP TABLE
+  // -------------------------
+
+  if (chosenP === "Eisenhower") {
+
+    vpTable = {
+      "Dwight Eisenhower": eisenhowerVPs[chosenVP] || "Richard Nixon",
+      "Adlai Stevenson": "John Sparkman",
+      "Dixiecrats": "N/A",
+      "Others": "Various",
+      "Undecided": "N/A"
+    };
+
   }
+
+  else if (chosenP === "Stevenson") {
+
+    vpTable = {
+      "Dwight Eisenhower": "Richard Nixon",
+      "Adlai Stevenson": stevensonVPs[chosenVP] || "John Sparkman",
+      "Dixiecrats": "N/A",
+      "Others": "Various",
+      "Undecided": "N/A"
+    };
+
+  }
+
+
+  // -------------------------
+  // BUILD HISTORICAL TABLE
+  // -------------------------
+
+  let vpTableHistorical = {
+    "Dwight Eisenhower": "Richard Nixon",
+    "Adlai Stevenson": "John Sparkman",
+    "Dixiecrats": "N/A",
+    "Others": "Various",
+  };
+
+
+  // -------------------------
+  // LIVE RESULTS TABLE
+  // -------------------------
+
+  const resultsTable =
+    resultsTableHolder.childNodes[3].childNodes[3].children[0];
+
+
+  for (let i = 0; i < resultsTable.rows.length; i++) {
+
+    const row = resultsTable.rows[i];
+
+    row.insertCell(1);
+
+    if (i === 0) {
+
+      row.cells[1].innerHTML = "<b>Running Mate</b>";
+
+    } else {
+
+      const rawName = row.cells[0].innerText.trim();
+      const name = rawName.replace(/^[-\s]+/, "").trim();
+
+      console.log("LIVE NAME =", JSON.stringify(name));
+      console.log("VP LOOKUP =", vpTable[name]);
+
+      row.cells[1].innerHTML = vpTable[name] || "—";
+
+    }
+
+  }
+
+
+  // -------------------------
+  // HISTORICAL RESULTS TABLE
+  // -------------------------
+
+  const resultsTableHistorical =
+    resultsTableHolder.childNodes[5].childNodes[3].children[0];
+
+
+  for (let i = 0; i < resultsTableHistorical.rows.length; i++) {
+
+    const row = resultsTableHistorical.rows[i];
+
+    row.insertCell(1);
+
+    if (i === 0) {
+
+      row.cells[1].innerHTML = "<b>Running Mate</b>";
+
+    } else {
+
+      const rawName = row.cells[0].innerText.trim();
+      const name = rawName.replace(/^[-\s]+/, "").trim();
+
+      console.log("HIST:", "[" + name + "]");
+
+      row.cells[1].innerHTML = vpTableHistorical[name] || "—";
+
+    }
+
+  }
+
 }
 
-// --------------------------------------------
+
+// -------------------------
 // OBSERVER
-// --------------------------------------------
-const node = document.getElementById("game_window");
-const config = { attributes: true, childList: true, subtree: true };
+// -------------------------
+
+const gameWindowNode = document.getElementById("game_window");
+
 const observer = new MutationObserver(onGameWindowChangeCandidates);
-observer.observe(node, config);
+
+observer.observe(gameWindowNode, {
+  attributes: true,
+  childList: true,
+  subtree: true
+});
+
+function tunnel(new_q){
+    e = campaignTrail_temp;
+    return e.questions_json[e.questions_json.map(f=>f.pk).indexOf(new_q)];
+}
+
+    // CYOA for VP switcher
+var changeGameDisp = (hide) => {
+    disp = "";
+    if (hide) {
+      disp = "none";
+    }
+    Array.from(gameWindow.children).forEach(f=>{
+        if(!f.classList.contains("game_header") && (f.id != "main_content_area" || !$("#campaign_sign")[0])) 
+            f.style.display = disp
+    });
+  };
+
+e.vpSwitcher = () => {
+    let potential_running_mate_pks = e.running_mate_json.filter(f=>f.fields.candidate == e.candidate_id).map(f=>f.fields.running_mate);
+    let pot_run_mat = potential_running_mate_pks.map(f=>e.candidate_json.find(_f=>_f.pk===f));
+    let running_mate_options = ``;
+    pot_run_mat.forEach(f=> {
+        running_mate_options += `<option value="${f.pk}">${f.fields.first_name} ${f.fields.last_name}</option>\n`
+    });
+
+    let vp_html = `
+        <div id="running_mate_form">
+            <form name="running mate">
+                <p></p>
+                <h3>Please select your running mate:</h3> 
+                <select name="running_mate_id" id="running_mate_id">
+                    ${running_mate_options}
+                </select>
+                <p></p>
+            </form>
+        </div>
+        <div class="person_description_window" id="running_mate_description_window">
+            <div class="person_image" id="running_mate_image"> <img src="${pot_run_mat[0].fields.image_url}" width="210" height="250"> </div>
+            <div class="person_summary" id="running_mate_summary">
+                <ul>
+                    <li>Name: ${pot_run_mat[0].fields.first_name} ${pot_run_mat[0].fields.last_name}</li>
+                    <li>Party: ${pot_run_mat[0].fields.party}</li>
+                    <li>Home State: ${pot_run_mat[0].fields.state}</li>
+                </ul>
+                ${pot_run_mat[0].fields.description_as_running_mate}
+            </div>
+        </div>
+        <p> <button class="person_button" id="running_mate_id_button">Continue</button> </p>
+    `
+
+    let vp_screen = document.createElement("div");
+    vp_screen.classList.add("inner_window_w_desc");
+    vp_screen.id = "inner_window_4";
+    vp_screen.innerHTML = vp_html;
+
+    changeGameDisp(true);
+
+    gameWindow.appendChild(vp_screen);
+
+    // now we make the stuff do stuff!
+
+    $("#running_mate_id").change((_e)=>{
+        _e.preventDefault()
+
+        let value = Number($("#running_mate_id").val());
+        let i = potential_running_mate_pks.findIndex(f=>f === value);
+
+        let screen_html = `
+            <div class="person_image" id="running_mate_image"> <img src="${pot_run_mat[i].fields.image_url}" width="210" height="250"> </div>
+            <div class="person_summary" id="running_mate_summary">
+                <ul>
+                    <li>Name: ${pot_run_mat[i].fields.first_name} ${pot_run_mat[i].fields.last_name}</li>
+                    <li>Party: ${pot_run_mat[i].fields.party}</li>
+                    <li>Home State: ${pot_run_mat[i].fields.state}</li>
+                </ul>
+                ${pot_run_mat[i].fields.description_as_running_mate}
+            </div>
+        `
+
+        $("#running_mate_description_window").html(screen_html);
+
+    });
+    // VP selected!
+
+    $("#running_mate_id_button").click((_e)=>{
+        _e.preventDefault();
+
+        let value = Number($("#running_mate_id").val());
+        let i = potential_running_mate_pks.findIndex(f=>f === value);
+
+        e.running_mate_last_name = pot_run_mat[i].fields.last_name;
+        e.running_mate_image_url = pot_run_mat[i].fields.image_url;
+        e.selected_running_mate = pot_run_mat[i];
+
+        if ($("#campaign_sign")[0]) {
+            $("#campaign_sign").html(`<p>${e.candidate_last_name}</p><p>${e.running_mate_last_name}</p>`);
+            $("#running_mate_pic").attr("src", e.running_mate_image_url)
+        }
+        $("#inner_window_4").remove();
+        changeGameDisp(false);
+    })
+  }
 
 
 campaignTrail_temp.cyoa = true
@@ -342,146 +490,4 @@ campaignTrail_temp.candidate_json[0]["fields"].first_name = "Dwight";
 campaignTrail_temp.candidate_json[0]["fields"].last_name = "Eisenhower";
 }
     } 
-var changeGameDisp = (hide) => {
-    disp = "";
-    if (hide) {
-      disp = "none";
-    }
-    Array.from(gameWindow.children).forEach(f=>{
-        if(!f.classList.contains("game_header") && (f.id != "main_content_area" || !$("#campaign_sign")[0])) 
-            f.style.display = disp
-    });
-  };
 
-e.vpSwitcher = () => {
-    let potential_running_mate_pks = e.running_mate_json.filter(f=>f.fields.candidate == e.candidate_id).map(f=>f.fields.running_mate);
-    let pot_run_mat = potential_running_mate_pks.map(f=>e.candidate_json.find(_f=>_f.pk===f));
-    let running_mate_options = ``;
-    pot_run_mat.forEach(f=> {
-        running_mate_options += `<option value="${f.pk}">${f.fields.first_name} ${f.fields.last_name}</option>\n`
-    });
-
-    let vp_html = `
-        <div id="running_mate_form">
-            <form name="running mate">
-                <p></p>
-                <h3>Please select your running mate:</h3> 
-                <select name="running_mate_id" id="running_mate_id">
-                    ${running_mate_options}
-                </select>
-                <p></p>
-            </form>
-        </div>
-        <div class="person_description_window" id="running_mate_description_window">
-            <div class="person_image" id="running_mate_image"> <img src="${pot_run_mat[0].fields.image_url}" width="210" height="250"> </div>
-            <div class="person_summary" id="running_mate_summary">
-                <ul>
-                    <li>Name: ${pot_run_mat[0].fields.first_name} ${pot_run_mat[0].fields.last_name}</li>
-                    <li>Party: ${pot_run_mat[0].fields.party}</li>
-                    <li>Home State: ${pot_run_mat[0].fields.state}</li>
-                </ul>
-                ${pot_run_mat[0].fields.description_as_running_mate}
-            </div>
-        </div>
-        <p> <button class="person_button" id="running_mate_id_button">Continue</button> </p>
-    `
-
-    let vp_screen = document.createElement("div");
-    vp_screen.classList.add("inner_window_w_desc");
-    vp_screen.id = "inner_window_4";
-    vp_screen.innerHTML = vp_html;
-
-    changeGameDisp(true);
-
-    gameWindow.appendChild(vp_screen);
-
-    // now we make the stuff do stuff!
-
-    $("#running_mate_id").change((_e)=>{
-        _e.preventDefault()
-
-        let value = Number($("#running_mate_id").val());
-        let i = potential_running_mate_pks.findIndex(f=>f === value);
-
-        let screen_html = `
-            <div class="person_image" id="running_mate_image"> <img src="${pot_run_mat[i].fields.image_url}" width="210" height="250"> </div>
-            <div class="person_summary" id="running_mate_summary">
-                <ul>
-                    <li>Name: ${pot_run_mat[i].fields.first_name} ${pot_run_mat[i].fields.last_name}</li>
-                    <li>Party: ${pot_run_mat[i].fields.party}</li>
-                    <li>Home State: ${pot_run_mat[i].fields.state}</li>
-                </ul>
-                ${pot_run_mat[i].fields.description_as_running_mate}
-            </div>
-        `
-
-        $("#running_mate_description_window").html(screen_html);
-
-    });
-    // VP selected!
-
-    $("#running_mate_id_button").click((_e)=>{
-        _e.preventDefault();
-
-        let value = Number($("#running_mate_id").val());
-        let i = potential_running_mate_pks.findIndex(f=>f === value);
-
-        e.running_mate_last_name = pot_run_mat[i].fields.last_name;
-        e.running_mate_image_url = pot_run_mat[i].fields.image_url;
-        e.selected_running_mate = pot_run_mat[i];
-
-        if ($("#campaign_sign")[0]) {
-            $("#campaign_sign").html(`<p>${e.candidate_last_name}</p><p>${e.running_mate_last_name}</p>`);
-            $("#running_mate_pic").attr("src", e.running_mate_image_url)
-        }
-
-	if(e.running_mate_last_name==="Borah"){
-	console.log(campaignTrail_temp.questions_json[5])
-    campaignTrail_temp.questions_json[5] = {
-        "model": "campaign_trail.question",
-        "pk": 3058094,
-        "fields": {
-          "priority": 1,
-          "description": "You've steered the convention to select William Borah as the nominee. Given the policy differences between you two - why?",
-          "likelihood": 1
-        }
-      }
-	var button1 = document.getElementById('view_electoral_map');	
-
-	button1.click();
-
-
-	setTimeout(function(){
-	var button2 = document.getElementById('resume_questions_button');	
-        button2.click();
-	}, 50);
-	console.log(campaignTrail_temp.questions_json[7])
-	}
-
-	if(e.running_mate_last_name==="Vandenberg"){
-	console.log(campaignTrail_temp.questions_json[5])
-    campaignTrail_temp.questions_json[5] = {
-        "model": "campaign_trail.question",
-        "pk": 3058095,
-        "fields": {
-          "priority": 1,
-          "description": "After some effort, you've pulled the convention into nominating Arthur Vandenberg for Vice President. With so much effort put into having him selected, can you explain your rationale behind your decisions?",
-          "likelihood": 1
-        }
-      }
-	var button1 = document.getElementById('view_electoral_map');
-	button1.click();
-
-
-	setTimeout(function(){
-	var button2 = document.getElementById('resume_questions_button');	
-        button2.click();
-	}, 50);
-	console.log(campaignTrail_temp.questions_json[7])
-	}
-
-
-        $("#inner_window_4").remove();
-        changeGameDisp(false);
-    })
-  }
