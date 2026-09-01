@@ -118,29 +118,53 @@ function onGameWindowChangeCandidates() {
   // BUILD LIVE VP TABLE
   // -------------------------
 
-  if (chosenP === "Eisenhower") {
+if (chosenP === "Eisenhower") {
 
-    vpTable = {
-      "Dwight Eisenhower": eisenhowerVPs[chosenVP] || "Richard Nixon",
-      "Adlai Stevenson": "John Sparkman",
-      "Dixiecrats": "N/A",
-      "Others": "Various",
-      "Undecided": "N/A"
-    };
+  vpTable = {
+    "Dwight Eisenhower": eisenhowerVPs[chosenVP] || "Richard Nixon",
+    "Adlai Stevenson": "John Sparkman",
+    "Dixiecrats": "N/A",
+    "Others": "Various",
+    "Undecided": "N/A"
+  };
 
-  }
+}
 
-  else if (chosenP === "Stevenson") {
+else if (chosenP === "Warren") {
 
-    vpTable = {
-      "Dwight Eisenhower": "Richard Nixon",
-      "Adlai Stevenson": stevensonVPs[chosenVP] || "John Sparkman",
-      "Dixiecrats": "N/A",
-      "Others": "Various",
-      "Undecided": "N/A"
-    };
+  vpTable = {
+    "Earl Warren": "Everett Dirksen",
+    "Adlai Stevenson": "John Sparkman",
+    "Dixiecrats": "N/A",
+    "Others": "Various",
+    "Undecided": "N/A"
+  };
 
-  }
+}
+
+else if (chosenP === "Taft") {
+
+  vpTable = {
+    "Robert Taft": "Richard Nixon",
+    "Adlai Stevenson": "John Sparkman",
+    "Dixiecrats": "N/A",
+    "Others": "Various",
+    "Undecided": "N/A"
+  };
+
+}
+
+else if (chosenP === "Stevenson") {
+
+  vpTable = {
+    "Dwight Eisenhower": "Richard Nixon",
+    "Adlai Stevenson": stevensonVPs[chosenVP] || "John Sparkman",
+    "Dixiecrats": "N/A",
+    "Others": "Various",
+    "Undecided": "N/A"
+  };
+
+}
 
 
   // -------------------------
@@ -357,11 +381,46 @@ style_overwrite.innerHTML = `
     background-color: var(--primary-bg);
     margin: .5em;
     border-style: solid;
-    border-color: var(--border-color);
+    border-color: inherit;
     border-width: 3px;
     height: 47.5em;
     text-align: center;
     position: relative;
+}
+.inner_window_question h3 {
+  background-color: #e6f0f0;
+}
+.overlay_window h3 {
+  background-color: #d8e5e8;
+}
+#overall_result_container {
+  background-color: #61707d;
+}
+#menu_container {
+  background-color: #61707d;
+}
+.content_single li {
+  line-height: 1.25em;
+}
+.content_single p {
+  line-height: 1.25em;
+}
+#state_result_container {
+  height: 215px;
+  width: 100%;
+  background-color: #61707d;
+}
+
+#results_container {
+  color: white !important;
+}
+
+#overall_details_container.done {
+  color: white !important;
+}
+
+#map_container {
+  height: 30.73em !important;
 }
 }`
 ;
