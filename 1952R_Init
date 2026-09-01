@@ -79,7 +79,7 @@ HistHexcolour=["#DF9496","#A2ADBC","#c7d1c0"];
 }
 #recommended_reading_box {
   overflow-y: auto;
-  line-height: 1.5;
+  line-height: 2.5;
   height: 75%;
 }
 #main_content_area_reading {
